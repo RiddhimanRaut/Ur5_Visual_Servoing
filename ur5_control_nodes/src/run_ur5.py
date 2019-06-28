@@ -8,7 +8,6 @@ from std_msgs.msg import Header
 from control_msgs.msg import *
 from trajectory_msgs.msg import *
 
-
 joint_vel=None   
 JOINT_NAMES=['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint','wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
 def joint_velocity_callback(data):
@@ -21,9 +20,8 @@ def joint_states(velocity):
     global JOINT_NAMES
     # print velocity
     
-    
     pub = rospy.Publisher('/ur_driver/joint_speed', JointTrajectory, queue_size=10)
-    rate = rospy.Rate(100) # 10hz
+    rate = rospy.Rate(125) # 10hz
     hello_str = JointTrajectory()
     hello_str.header = Header()
     hello_str.joint_names=JOINT_NAMES
@@ -31,17 +29,7 @@ def joint_states(velocity):
     hello_str.header.seq=hello_str.header.seq+1
     hello_str.header.stamp-rospy.Time.now()
     pub.publish(hello_str)
-    rate.sleep
-    
-    
-    
-    
-
-
-
-
-    # print jacobian
-
+    rate.sleep()
 
 def run_ur5():
     global joint_vel
@@ -51,10 +39,7 @@ def run_ur5():
     rospy.Subscriber("ur5_joint_velocities", floatList, joint_velocity_callback)
     while not rospy.is_shutdown():
         joint_states(joint_vel)
-    else:
-        joint_states((0,0,0,0,0,0))
-
-
+    
 
 if __name__ == '__main__':
     
@@ -62,7 +47,3 @@ if __name__ == '__main__':
             run_ur5()
         except rospy.ROSInterruptException:
             pass
-
-
-    
-    
