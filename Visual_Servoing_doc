@@ -1,0 +1,74 @@
+*/ Image Based Visual Servoing Using UR5 (eye_in_hand) /*
+
+*/ Created By: Riddhiman Raut, Mithun P. /*
+*/ email id : rik.raut98@gmail.com
+						  mithun.p@research.iiit.ac.in/*
+
+
+Steps:
+
+1. Download the packages from the repository into the src folder in your workspace.
+   Run catkin_make.
+
+2. Navigate to the ur5_control_nodes folder. Run ls in terminal to see the nodes. Check for the nodes that we are going to use.
+   They are object_detect.py, KCF_tracking.p, vs_ur5.py, run_ur5.py. If they are of a different colour than the rest, we are ready to roll. If not,
+   that means they are not executable and we need to make them executable.
+
+   Run the following command:
+   sudo chmod +x <node_name>
+
+3. Run freenect/openni (whatever works for you) to start up the kinect. In a new terminal, start up the robot.
+	 
+	roslaunch openni_launch openni.launch device_id:=(device_id) #openni worked for me
+  roslaunch ur_modern_driver ur5_bringup.launch robot_ip:=(robot_ip)
+
+4. In a new terminal, Run:
+	 object_detect.py: If you want colour based detection
+   KCF_detect.py: If you want tracker based detection
+
+   Command:
+   rosrun ur5_control_nodes <node name.py>
+
+   You should see the camera live feed now. 
+
+   Notes regarding object_tracking.py:
+   
+   The default colours used in the program are Red, Blue, Green, Orange. The code detects the *LARGEST* contour of these colours,
+   & computes the centroid.If you want to detect some other colours, an example of using trackbar has been implemented in the code,
+	 uncomment it.
+   
+   For visual servoing, you need a desired and a current image. When the robot is at its desired position at the beginning, you would want
+   to record it, press "s" to do so. When you move the robot. you'll see red dots in the desired centroid positions. So when you run
+   visual servoing from any other position, you can see the black(current) centroids converging with the red(desired) centroids.
+
+	 Known issues: None
+	 
+   Notes regarding KCF_tracking.py:
+
+   When you see the live camera feed, press "s" to pause it. Then using your mouse, drag a Region Of Interest(ROI) around the object 
+   you want to track. When you're done, press "SPACE" to resume live video feed. The blue border around your ROI will turn green, meaning
+   your tracker is live! You'll find a black dot at the centre of the rectangle, it's the centroid. You can select as many ROIs as you want.
+   
+
+   Known issues: When the velocity of the robot becomes very slow towards the end of the visual servoing algorithm, the object tracking
+   stops. Not sure what the problem is. 
+
+5. Run visual servoing node.
+
+   Command:
+   rosrun ur5_control_nodes vs_ur5.py 
+
+   You'll see the joint velocities, as well as the MOM of Jacobian and interaction matrices.
+
+   The jacobian is imported from the jacobian_func.py. You can generated your own jacobian for any other robot using Peter Corke's Robotics Toolbox.
+   Just replace the jacobian in jacobian_func.py and you are good to go. This has been tested only with UR5 and no other robot, so feedback is welcome.
+
+6. Now let's run the robot!
+   
+   Command:
+   rosrun ur5_control_nodes run_ur5.py
+
+   You'll see the robot (hopefully) converging to the desired position. The joint velocities are published as zero if the mean error is less than 20.
+   
+
+
